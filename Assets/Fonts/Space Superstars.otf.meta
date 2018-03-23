@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: a3ee9f8eaa28ce0458f4496550fe5d6b
+timeCreated: 1521648356
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: Space Superstars
+  fontNames:
+  - Space Superstars
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
