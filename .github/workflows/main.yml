@@ -1,0 +1,71 @@
+name: Build Android #workflow's name
+
+#Event to run/trigger the workflows. 
+on: [ workflow_dispatch ] 
+
+jobs:
+  
+  build:
+    name: Build #job's name
+    runs-on: ubuntu-latest #OS to be used for the build 
+    outputs:
+      buildVersion: ${{ steps.build.outputs.buildVersion }}
+    steps:
+      - name: Free Disk Space for Android Build
+        run: |
+          df -h
+          sudo swapoff -a
+          sudo rm -f /swapfile
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /opt/ghc
+          sudo rm -rf "/usr/local/share/boost"
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          df -h
+
+      # Checkout
+      # it will checkout your repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+
+      # Cache
+      # so the next build will be faster.
+      - uses: actions/cache@v3
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
+
+      # Build 
+      # If it's first build, it will take longer than next builds
+      # and then it will be faster since the libraries are cached.
+      - name: Build Project
+        id: BuildProject
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          # allowDirtyBuild: true
+          targetPlatform: Android
+          unityVersion: 2023.2.17f1
+          androidExportType: 'androidAppBundle' #set to 'androidAppBundle' for an .aab or 'androidPackage' for an .apk 
+          androidKeystoreName: YOUR_KEYSTORE_FILE_NAME.keystore
+          androidKeystoreBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          androidKeystorePass: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          androidKeyaliasName: ${{ secrets.ANDROID_KEYALIAS_NAME }}
+          androidKeyaliasPass: ${{ secrets.ANDROID_KEYALIAS_PASS }}
+          androidTargetSdkVersion: AndroidApiLevel33 
+          versioning: Custom
+          androidVersionCode: 1 #same as Bundle Version Code in Unity Editor's Player identification
+          version: 1.0.0 #same as Version in Unity Editor's Player identification
+          buildName: Build #build's name, just leave it as Build for now
+
+      # Output. It will upload the build result (artifact) to the workflow wummary page
+      - uses: actions/upload-artifact@v4.6.2
+        with:
+          name: Build #build's name, just leave it as Build for now
+          path: build
